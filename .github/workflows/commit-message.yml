@@ -1,0 +1,21 @@
+name: Afficher le message du dernier commit
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  afficher-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Recuperer le depot
+        uses: actions/checkout@v4
+
+      - name: Afficher le message du dernier commit
+        run: |
+          echo "Message du dernier commit :"
+          git log -1 --pretty=%B
