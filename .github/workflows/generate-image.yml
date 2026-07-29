@@ -1,0 +1,134 @@
+name: Generer une image et deployer la galerie
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Recuperer le depot
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Recuperer le message du dernier commit
+        id: commit
+        run: |
+          MESSAGE=$(git log -1 --pretty=%B)
+          echo "Message du commit : $MESSAGE"
+          echo "message<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Creer le dossier images
+        run: mkdir -p images
+
+      - name: Generer l image avec DynaPictures
+        env:
+          DYNAPICTURES_API_KEY: ${{ secrets.DYNAPICTURES_API_KEY }}
+          COMMIT_MESSAGE: ${{ steps.commit.outputs.message }}
+        run: |
+          JSON=$(jq -n \
+            --arg text "$COMMIT_MESSAGE" \
+            '{
+              format: "png",
+              params: [
+                {
+                  name: "text",
+                  text: $text
+                }
+              ]
+            }')
+
+          RESPONSE=$(curl -s -X POST \
+            "https://api.dynapictures.com/designs/fe74d71bb7" \
+            -H "Authorization: Bearer $DYNAPICTURES_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$JSON")
+
+          echo "$RESPONSE"
+
+          IMAGE_URL=$(echo "$RESPONSE" | jq -r '.imageUrl')
+
+          if [ -z "$IMAGE_URL" ] || [ "$IMAGE_URL" = "null" ]; then
+            echo "Erreur : aucune URL d image recue"
+            exit 1
+          fi
+
+          FILE_NAME="${GITHUB_SHA:0:7}.png"
+
+          curl -L "$IMAGE_URL" -o "images/$FILE_NAME"
+
+      - name: Committer l image dans le depot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add images/
+
+          if git diff --cached --quiet; then
+            echo "Aucune nouvelle image a committer"
+          else
+            git commit -m "Ajout image generee automatiquement"
+            git push
+          fi
+
+      - name: Creer la galerie HTML
+        run: |
+          mkdir -p public/images
+          cp images/* public/images/
+
+          cat > public/index.html <<'EOF'
+          <!DOCTYPE html>
+          <html lang="fr">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Galerie des commits</title>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                max-width: 1000px;
+                margin: 40px auto;
+                padding: 20px;
+              }
+              .gallery {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+              }
+              img {
+                width: 100%;
+                border-radius: 8px;
+              }
+            </style>
+          </head>
+          <body>
+            <h1>Galerie des images generees</h1>
+            <div class="gallery">
+          EOF
+
+          for image in public/images/*; do
+            filename=$(basename "$image")
+            echo "<div><img src=\"images/$filename\" alt=\"$filename\"><p>$filename</p></div>" >> public/index.html
+          done
+
+          cat >> public/index.html <<'EOF'
+            </div>
+          </body>
+          </html>
+          EOF
+
+      - name: Deployer sur GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
