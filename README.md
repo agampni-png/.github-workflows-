@@ -14,3 +14,7 @@ Projet réalisé dans le cadre des exercices GitHub Actions.
 [![Afficher le message du dernier commit](https://github.com/agampni-png/.github-workflows-/actions/workflows/commit-message.yml/badge.svg?branch=main)](https://github.com/agampni-png/.github-workflows-/actions/workflows/commit-message.yml)
 
 [![Generer une image et deployer la galerie](https://github.com/agampni-png/.github-workflows-/actions/workflows/generate-image.yml/badge.svg?branch=main)](https://github.com/agampni-png/.github-workflows-/actions/workflows/generate-image.yml)
+
+## 🔄 Badge dynamique
+
+![Nombre de commits](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/agampni-png/.github-workflows-/main/badges/badge.json)
