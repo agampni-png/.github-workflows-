@@ -228,3 +228,12 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
+
+      - name: Envoyer une notification Discord
+        if: success()
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -H "Content-Type: application/json" \
+          -d "{\"content\":\"✅ Nouvelle image générée avec succès par GitHub Actions !\"}" \
+          "$DISCORD_WEBHOOK_URL"
