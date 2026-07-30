@@ -17,6 +17,12 @@ Projet réalisé dans le cadre des exercices GitHub Actions.
 
 [![Mettre a jour le badge commits](https://github.com/agampni-png/.github-workflows-/actions/workflows/update-badge.yml/badge.svg)](https://github.com/agampni-png/.github-workflows-/actions/workflows/update-badge.yml)
 
+## 📈 Informations du dépôt
+
+![Taille du dépôt](https://img.shields.io/github/repo-size/agampni-png/.github-workflows-)
+![Issues ouvertes](https://img.shields.io/github/issues/agampni-png/.github-workflows-)
+![Taille du code](https://img.shields.io/github/languages/code-size/agampni-png/.github-workflows-)
+
 ## 🔄 Badge dynamique
 
 ![Nombre de commits](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/agampni-png/.github-workflows-/main/badges/badge.json)
