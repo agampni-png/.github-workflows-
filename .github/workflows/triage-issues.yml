@@ -9,11 +9,35 @@ permissions:
   contents: read
 
 jobs:
-  welcome:
+  triage:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Poster un commentaire d accueil
+      - name: Recuperer le depot
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Analyser l issue avec OpenAI
+        id: analyse
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ISSUE_TITRE: ${{ github.event.issue.title }}
+          ISSUE_CORPS: ${{ github.event.issue.body }}
+        run: node scripts/triage-issue.js
+
+      - name: Poser le label
+        if: steps.analyse.outputs.label != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUMERO: ${{ github.event.issue.number }}
+          LABEL: ${{ steps.analyse.outputs.label }}
+        run: gh issue edit "$NUMERO" --add-label "$LABEL"
+
+      - name: Poster le commentaire d accueil
         uses: actions/github-script@v7
         with:
           script: |
@@ -21,5 +45,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: "👋 Merci pour cette issue ! Un mainteneur va la relire. En attendant, vérifiez qu'elle contient bien les étapes pour reproduire le problème."
+              body: "👋 Merci pour cette issue ! Elle a été analysée automatiquement et classée pour faciliter son traitement."
             })
