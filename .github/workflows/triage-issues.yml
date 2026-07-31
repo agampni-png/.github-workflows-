@@ -1,0 +1,25 @@
+name: Triage des issues
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  welcome:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Poster un commentaire d accueil
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: "👋 Merci pour cette issue ! Un mainteneur va la relire. En attendant, vérifiez qu'elle contient bien les étapes pour reproduire le problème."
+            })
