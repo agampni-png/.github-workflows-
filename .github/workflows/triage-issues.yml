@@ -47,12 +47,18 @@ jobs:
         run: gh issue edit "$NUMERO" --add-label "$LABEL"
 
       - name: Poster le commentaire d accueil
-        uses: actions/github-script@v7
-        with:
-          script: |
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: "👋 Merci pour cette issue ! Elle a été analysée automatiquement et classée pour faciliter son traitement."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUMERO: ${{ github.event.issue.number }}
+          DOUBLON: ${{ steps.analyse.outputs.doublon }}
+        run: |
+          if [ -n "$DOUBLON" ]; then
+            echo "👋 Merci pour cette issue !" > commentaire.md
+            echo "" >> commentaire.md
+            echo "🔁 Cette issue ressemble beaucoup à #$DOUBLON, qui est déjà ouverte. Jetez-y un œil !" >> commentaire.md
+          else
+            echo "👋 Merci pour cette issue ! Un mainteneur va la relire." > commentaire.md
+          fi
+
+          gh issue comment "$NUMERO" --body-file commentaire.md
             })
