@@ -15,6 +15,8 @@ Projet réalisé dans le cadre des exercices GitHub Actions.
 
 [![Generer une image et deployer la galerie](https://github.com/agampni-png/.github-workflows-/actions/workflows/generate-image.yml/badge.svg?branch=main)](https://github.com/agampni-png/.github-workflows-/actions/workflows/generate-image.yml)
 
+[![Triage des issues](https://github.com/agampni-png/.github-workflows-/actions/workflows/triage-issues.yml/badge.svg?branch=main)](https://github.com/agampni-png/.github-workflows-/actions/workflows/triage-issues.yml)
+
 [![Mettre a jour le badge commits](https://github.com/agampni-png/.github-workflows-/actions/workflows/update-badge.yml/badge.svg)](https://github.com/agampni-png/.github-workflows-/actions/workflows/update-badge.yml)
 
 ## 📈 Informations du dépôt
