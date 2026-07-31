@@ -21,12 +21,21 @@ jobs:
         with:
           node-version: 20
 
+      - name: Lister les issues ouvertes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUMERO: ${{ github.event.issue.number }}
+        run: |
+          gh issue list --state open --limit 50 --json number,title > issues-existantes.json
+          jq "map(select(.number != ($NUMERO | tonumber)))" issues-existantes.json > issues-filtrees.json
+
       - name: Analyser l issue avec OpenAI
         id: analyse
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           ISSUE_TITRE: ${{ github.event.issue.title }}
           ISSUE_CORPS: ${{ github.event.issue.body }}
+          ISSUES_EXISTANTES: issues-filtrees.json
         run: node scripts/triage-issue.js
 
       - name: Poser le label
